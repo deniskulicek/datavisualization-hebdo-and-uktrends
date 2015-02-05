@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+  <head>
+    <meta charset="utf-8">
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <style>
+      body {
+        color: #121401;
+      }
+      svg {
+        font: 12px sans-serif;
+      }
+
+      .legend {
+        font: 18px sans-serif;
+      }
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: #121401;
+        stroke-width: 2px;
+        shape-rendering: crispEdges;
+      }
+      .point {
+        stroke: grey;
+        stroke-width: 3px;
+        opacity: 0;
+      }
+      .point:hover{
+        opacity: .5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2 style="padding-left:60px;">Types of words used in news articles and on reddit after Paris Attack</h2>
+      <div id="graph"></div>
+      <div id="filters">
+        <h3>Filter:</h3>
+        <div class="radio">
+          <label><input name="category" type="radio" value="all" checked/> All</label>
+        </div>
+        <div class="radio">
+          <label><input name="category" type="radio" value="religion"/> Religious<sup>*</sup></label>
+        </div>
+        <div class="radio">
+          <label><input name="category" type="radio" value="violence"/> Violence<sup>**</sup></label>
+        </div>
+        <div class="radio">
+          <label><input name="category" type="radio" value="freedom"/> Freedom of speech<sup>***</sup></label>
+        </div>
+      </div>
+      <div id="legend">
+        <i>* <b>Religious</b> words taken into consideration (lowecased): <b>faith, islam(ic), muslim(s), prophet, muhammad, religion/religious, jew(s), jewish, israel, qaeda</b></i><br/>
+        <i>** <b>Violent</b> words taken into consideration (lowecased): <b>attack(ers), kill(ed), gunmen, dead/death, police, violence, terror(ist(s)), hostage(s), kouachi, suicide, qaeda</b></i><br/>
+        <i>*** <b>Freedom of speech</b> words taken into consideration (lowecased): <b>speech, satirical, right, solidarity, march, cartoons</b></i>
+      </div>
+    </div>
+    <script src="lib/d3.js"></script>
+    <script src="lib/jquery.js"></script>
+    <script src="lib/bootstrap.js"></script>
+    <script>
+      var margin = {top: 20, right: 55, bottom: 30, left: 50  },
+          width  = 1000 - margin.left - margin.right;
+          height = 500  - margin.top  - margin.bottom;
+
+      var x = d3.scale.ordinal()
+          .rangeRoundBands([0, width], .1);
+
+      var y = d3.scale.linear()
+          .rangeRound([height, 0]);
+
+      var xAxis = d3.svg.axis()
+          .scale(x)
+          .orient("bottom");
+
+      var yAxis = d3.svg.axis()
+          .scale(y)
+          .orient("left");
+
+      var stack = d3.layout.stack()
+          .offset("zero")
+          .values(function (d) { return d.values; })
+          .x(function (d) { return x(d.label) + x.rangeBand() / 2; })
+          .y(function (d) { return d.value; });
+
+      var area = d3.svg.area()
+          .interpolate("cardinal")
+          .x(function (d) { return x(d.label) + x.rangeBand() / 2; })
+          .y0(function (d) { return y(d.y0); })
+          .y1(function (d) { return y(d.y0 + d.y); });
+
+      var color = d3.scale.ordinal()//.category10()
+          .range(["#fc8d59", "#ffffbf", "#99d594"]);
+
+      var svg = d3.select("#graph").append("svg")
+          .attr("width",  width  + margin.left + margin.right)
+          .attr("height", height + margin.top  + margin.bottom)
+        .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      var filterCategory = 'all';
+      var dataGlobal;
+
+      d3.csv("data/hebdo_crossview.csv", function (error, data) {
+
+        //console.log(error);
+
+        if(error===null){
+          dataGlobal = data;
+          quickLoadLazynessHack(filterCategory, data);
+        }
+
+        //quickLoadLazynessHack(filterCategory);
+
+      });
+
+      function quickLoadLazynessHack(filterCategory, data){
+
+        var labelVar = 'day';
+        var categVar = 'keyword'
+        var varNames = d3.keys(data[0])
+            .filter(function (key) { return (key !== labelVar)});
+        color.domain(varNames);
+
+        data.forEach(function (d) {
+          var y0 = 0;
+          console.log(d[categVar]);
+          if (d[categVar] === filterCategory){
+            d.mapping = varNames.map(function (name) { 
+              return {
+                name: name,
+                label: d[labelVar],
+                y0: y0,
+                y1: y0 += +d[name]
+              };
+            });
+            d.total = d.mapping[d.mapping.length - 1].y1;
+
+            console.log(d.mapping)
+          }
+        });
+
+        x.domain(data.map(function (d) { return d.day; }));
+        y.domain([0, d3.max(data, function (d) { return d.total; })]);
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+          .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Number of Rounds");
+
+        var selection = svg.selectAll(".series")
+            .data(data)
+          .enter().append("g")
+            .attr("class", "series")
+            .attr("transform", function (d) { return "translate(" + x(d.day) + ",0)"; });
+
+        selection.selectAll("rect")
+          .data(function (d) { return d.mapping; })
+        .enter().append("rect")
+          .attr("width", x.rangeBand())
+          .attr("y", function (d) { return y(d.y1); })
+          .attr("height", function (d) { return y(d.y0) - y(d.y1); })
+          .style("fill", function (d) { return color(d.name); })
+          .style("stroke", "grey")
+          .on("mouseover", function (d) { showPopover.call(this, d); })
+          .on("mouseout",  function (d) { removePopovers(); })
+
+        var legend = svg.selectAll(".legend")
+            .data(varNames.slice().reverse())
+          .enter().append("g")
+            .attr("class", "legend")
+            .attr("transform", function (d, i) { return "translate(55," + i * 20 + ")"; });
+
+        legend.append("rect")
+            .attr("x", width - 10)
+            .attr("width", 10)
+            .attr("height", 10)
+            .style("fill", color)
+            .style("stroke", "grey");
+
+        legend.append("text")
+            .attr("x", width - 12)
+            .attr("y", 6)
+            .attr("dy", ".35em")
+            .style("text-anchor", "end")
+            .text(function (d) { return d; });
+
+        function removePopovers () {
+          $('.popover').each(function() {
+            $(this).remove();
+          }); 
+        }
+
+          function showPopover (d) {
+            $(this).popover({
+              title: d.name,
+              placement: 'auto top',
+              container: 'body',
+              trigger: 'manual',
+              html : true,
+              content: function() { 
+                return "Day: " + d.label + 
+                       "<br/>Words: " + d3.format(",")(d.value ? d.value: d.y1 - d.y0); }
+            });
+            $(this).popover('show')
+          }
+        }
+
+        $('input[type=radio][name=category]').change(function() {
+            quickLoadLazynessHack(this.value, dataGlobal);
+            console.log(x)
+        });
+
+    </script>
+  </body>
+</html>
