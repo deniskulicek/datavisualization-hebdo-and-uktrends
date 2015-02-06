@@ -25,10 +25,13 @@
 <body>
 
   <div id="container" class="container">
+    <div class="col-md-4 pull-right">
+      Political party:
       <select id="text-select">
         <option value="cameron2010">Cameron</option>
         <option value="clegg2010">Clegg</option>
       </select>
+    </div>
     <header>
     <h1>Bubble Cloud</h1>
     <h2>The most frequently used words in:</h2>
@@ -58,7 +61,6 @@
 
   <script src="js/libs/d3.min.js"></script>
   <script type="text/javascript">
-    (function() {
 
       var Bubbles, root, texts;
 
@@ -101,6 +103,7 @@
           return rawData;
         };
         tick = function(e) {
+          console.log('tick', e)
           var dampenedAlpha;
           dampenedAlpha = e.alpha * 0.1;
           node.each(gravity(dampenedAlpha)).each(collide(jitter)).attr("transform", function(d) {
@@ -111,8 +114,10 @@
           }).style("top", function(d) {
             return ((margin.top + d.y) - d.dy / 2) + "px";
           });
+
         };
         force = d3.layout.force().gravity(0).charge(0).size([width, height]).on("tick", tick);
+
         chart = function(selection) {
           return selection.each(function(rawData) {
             var maxDomainValue, svg, svgEnter;
@@ -294,98 +299,69 @@
       root.plotData = function(selector, data, plot) {
         return d3.select(selector).datum(data).call(plot);
       };
-      
-
-      $(function() {
-        /*
-        var display, key, plot, text;
-        plot = Bubbles();
-        display = function(data) {
-            return plotData("#vis", data, plot);
-        };
-        key = decodeURIComponent(location.search).replace(/[\/\?]/, "");
-
-        text = texts[0]
-
-        $("#text-select").val(text.key);
+  
+      d3.csv("data/export_by_month.csv", function(error, data){
         
-        d3.select("#text-select").on("change", function(e) {
-          key = $(this).val();
-          location.replace("#");
-          return location.search = encodeURIComponent(key);
+        if(error) return;
+        
+        
+        //plotData("#vis", data, plot);
+        
+        //jQuery stuff
+        var replot = function(key){
+          clearPlot('#vis');
+
+          plot = Bubbles();
+          plotData('#vis', data.filter(function(o){return o.date===key}), plot); //add filter by party!
+        }
+
+        function clearPlot(key){
+          $(key).empty();
+        }
+        
+        $('#currentdate').on('input', function(slider){
+          var monthseq = +slider.target.value;
+          console.log(monthseq)
+          $('#currentYM').html(monthSeq2Nice(monthseq));
+          replot(monthSeq2Key(monthseq));
         });
+        
+        function zeroPad(num, places) {
+          var zero = places - num.toString().length + 1;
+          return Array(+(zero > 0 && zero)).join("0") + num;
+        }
 
-        d3.select("#party-name").html(text.name);
-        return d3.csv("data/" + text.file, display);
-        */
-          d3.csv("data/export_by_month.csv", function(error, data){
-            
-            if(error) return;
-            
-            
-            //plotData("#vis", data, plot);
-            
-            //jQuery stuff
-            var replot = function(key){
-              clearPlot('#vis');
-              plot = Bubbles();
-              plotData('#vis', data.filter(function(o){return o.date===key}), plot);
-            }
+        function monthSeq2Key(m){
+          var mnth = (m+1)%12;
+          if(mnth==0){mnth=12};
+          return (2010 + ~~(m/12)) + "" + zeroPad(mnth,2)
+        }
 
-            function clearPlot(key){
-              $(key).empty();
-            }
-            
-            $('#currentdate').on('input', function(slider){
-              var monthseq = +slider.target.value;
-              console.log(monthseq)
-              $('#currentYM').html(monthSeq2Nice(monthseq));
-              replot(monthSeq2Key(monthseq));
-            });
-            
-            function zeroPad(num, places) {
-              var zero = places - num.toString().length + 1;
-              return Array(+(zero > 0 && zero)).join("0") + num;
-            }
+        function monthSeq2Nice(m){
+          var month, year;
+          switch(m%12){
+            case 0: month = "January"; break;
+            case 1: month = "February"; break;
+            case 2: month = "March"; break;
+            case 3: month = "April"; break;
+            case 4: month = "May"; break;
+            case 5: month = "June"; break;
+            case 6: month = "July"; break;
+            case 7: month = "August"; break;
+            case 8: month = "September"; break;
+            case 9: month = "October"; break;
+            case 10: month = "November"; break;
+            case 11: month = "December"; break;
+          }
+          year = 2010 + ~~(m/12)
 
-            function monthSeq2Key(m){
-              var mnth = (m+1)%12;
-              if(mnth==0){mnth=12};
-              return (2010 + ~~(m/12)) + "" + zeroPad(mnth,2)
-            }
+          return month + ", " + year;
+        }
 
-            function monthSeq2Nice(m){
-              var month, year;
-              switch(m%12){
-                case 0: month = "January"; break;
-                case 1: month = "February"; break;
-                case 2: month = "March"; break;
-                case 3: month = "April"; break;
-                case 4: month = "May"; break;
-                case 5: month = "June"; break;
-                case 6: month = "July"; break;
-                case 7: month = "August"; break;
-                case 8: month = "September"; break;
-                case 9: month = "October"; break;
-                case 10: month = "November"; break;
-                case 11: month = "December"; break;
-              }
-              year = 2010 + ~~(m/12)
-
-              return month + ", " + year;
-            }
-
-            $('#currentdate').trigger('input');
-          })
-        });
-
-
-    }).call(this);
+        $('#currentdate').trigger('input');
+      })  
 
   </script>
-
-
-
 
 
   <!--[if lt IE 7 ]>
