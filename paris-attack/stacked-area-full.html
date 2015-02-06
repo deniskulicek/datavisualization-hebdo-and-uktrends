@@ -263,16 +263,52 @@
           }); 
         }
 
+        function dayToEvent(day){
+          switch(day.label){
+            case "Attack day":
+              return "<b>Gunman attack at Charlie Hebdo - (January 7th)<b>";
+            case "Day 1":
+              return "<b>Policewoman killed (January 8th)<b>";
+            case "Day 2":
+              return "<b>Hebdo suspects shot, supermarket siege shooting - (January 9th)<b>";
+            case "Day 3":
+              return "<b>January 10th<b>";
+            case "Day 4":
+              return "<b>Paris march for freedom of speech (January 11th)<b>";
+            case "Day 5":
+              return "<b>January 12th<b>";
+            case "Day 6":
+              return "<b>Press about release of next Charlie magazine (January 13th)<b>";
+            case "Day 7":
+              return "<b>Release day (January 14th)<b>";
+            case "Day 8":
+              return "<b>Cooldown (January 15th)<b>";
+            case "Day 9":
+              return "<b>Cooldown (January 16th)<b>";
+            case "Day 10":
+              return "<b>Cooldown (January 17th)<b>";
+            case "Day 11":
+              return "<b>Cooldown (January 18th)<b>";
+            case "Day 12":
+              return "<b>Cooldown (January 19th)<b>";
+            case "Day 13":
+              return "<b>Cooldown (January 20th)<b>";
+            case "Day 14":
+              return "<b>Cooldown (January 21th)<b>";
+          }
+          
+        }
+
         function showPopover (d) {
           $(this).popover({
-            title: d.name,
+            title: dayToEvent(d),
             placement: 'auto top',
             container: 'body',
             trigger: 'manual',
             html : true,
             content: function() {
-              
-              return "Day: " + d.label + 
+              dayToEvent(d);
+              return "Source: " + d.name + 
                      "<br/>Words: " + d.value }
           });
           $(this).popover('show')
