@@ -28,8 +28,8 @@
     <div class="col-md-4 pull-right">
       Political party:
       <select id="text-select">
-        <option value="cameron2010">Cameron</option>
-        <option value="clegg2010">Clegg</option>
+        <option value="cameron">Cameron</option>
+        <option value="clegg">Clegg</option>
       </select>
     </div>
     <header>
@@ -103,21 +103,30 @@
           return rawData;
         };
         tick = function(e) {
-          console.log('tick', e)
+          //console.log('tick', e)
           var dampenedAlpha;
           dampenedAlpha = e.alpha * 0.1;
-          node.each(gravity(dampenedAlpha)).each(collide(jitter)).attr("transform", function(d) {
-            return "translate(" + d.x + "," + d.y + ")";
-          });
-          return label.style("left", function(d) {
-            return ((margin.left + d.x) - d.dx / 2) + "px";
-          }).style("top", function(d) {
-            return ((margin.top + d.y) - d.dy / 2) + "px";
-          });
+          //console.log(dampenedAlpha)
+
+          if(dampenedAlpha > 0.005){
+            node.each(gravity(dampenedAlpha)).each(collide(jitter)).attr("transform", function(d) {
+              return "translate(" + d.x + "," + d.y + ")";
+            });
+            return label.style("left", function(d) {
+              return ((margin.left + d.x) - d.dx / 2) + "px";
+            }).style("top", function(d) {
+              return ((margin.top + d.y) - d.dy / 2) + "px";
+            });
+          } else {
+            console.log('unbinding', force);
+            force.stop();
+            //force.tick = function(){}
+            //force = d3.layout.force().size([width, height]).on("tick", tick)
+          }
 
         };
-        force = d3.layout.force().gravity(0).charge(0).size([width, height]).on("tick", tick);
-
+        //force = d3.layout.force().gravity(0).charge(0).size([width, height]).on("tick", tick);
+        force = d3.layout.force().size([width, height]).on("tick", tick)
         chart = function(selection) {
           return selection.each(function(rawData) {
             var maxDomainValue, svg, svgEnter;
@@ -293,7 +302,7 @@
           rValue = _;
           return chart;
         };
-        return chart;
+        return [chart, force];
       };
 
       root.plotData = function(selector, data, plot) {
@@ -308,11 +317,18 @@
         //plotData("#vis", data, plot);
         
         //jQuery stuff
-        var replot = function(key){
+        var replot = function(key, party){
           clearPlot('#vis');
-
-          plot = Bubbles();
-          plotData('#vis', data.filter(function(o){return o.date===key}), plot); //add filter by party!
+          var bubbly = Bubbles(); //keeps running tick in background even if deleted
+          var plot = bubbly[0];
+          var force = bubbly[1];
+          force.stop()
+          
+          console.log('Replotting for: ', party, key);
+          
+          plotData('#vis', data.filter(function(o){
+            return o.date===key && o.party === party;
+          }), plot); //add filter by party!
         }
 
         function clearPlot(key){
@@ -323,7 +339,12 @@
           var monthseq = +slider.target.value;
           console.log(monthseq)
           $('#currentYM').html(monthSeq2Nice(monthseq));
-          replot(monthSeq2Key(monthseq));
+          replot(monthSeq2Key(monthseq), $('#text-select').val());
+        });
+
+        $('#text-select').on('change', function(selected){
+          var monthseq = $('#currentdate').val();
+          replot(monthSeq2Key(monthseq), $('#text-select').val());
         });
         
         function zeroPad(num, places) {

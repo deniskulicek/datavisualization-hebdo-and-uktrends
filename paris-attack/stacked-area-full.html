@@ -62,6 +62,8 @@
         <i>* <b>Religious</b> words taken into consideration (lowecased): <b>faith, islam(ic), muslim(s), prophet, muhammad, religion/religious, jew(s), jewish, israel, qaeda</b></i><br/>
         <i>** <b>Violent</b> words taken into consideration (lowecased): <b>attack(ers), kill(ed), gunmen, dead/death, police, violence, terror(ist(s)), hostage(s), kouachi, suicide, qaeda</b></i><br/>
         <i>*** <b>Freedom of speech</b> words taken into consideration (lowecased): <b>speech, satirical, right, solidarity, march, cartoons</b></i>
+        <br/>
+        <i>All words were categorized manually based on dataset from scraped articles used for dataset itself.</i>
       </div>
         
     </div>
@@ -69,6 +71,11 @@
     <script src="lib/jquery.js"></script>
     <script src="lib/bootstrap.js"></script>
     <script>
+      var words = [];
+      words['religious'] = "faith, islam(ic), muslim(s), prophet, muhammad, religion/religious, jew(s), jewish, israel, qaeda";
+      words['violent'] = "attack(ers), kill(ed), gunmen, dead/death, police, violence, terror(ist(s)), hostage(s), kouachi, suicide, qaeda";
+      words['freedom'] = "speech, satirical, right, solidarity, march, cartoons";
+
       var margin = {top: 20, right: 55, bottom: 30, left: 60},
           width  = 1000 - margin.left - margin.right,
           height = 480  - margin.top  - margin.bottom;
