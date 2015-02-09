@@ -25,26 +25,24 @@
 <body>
 
   <div id="container" class="container">
-    <div class="col-md-4 pull-right">
-      <b>Selected political party: </b>&nbsp;
-      <select id="text-select">
-        <option value="cameron">Cameron</option>
-        <option value="clegg">Clegg</option>
-      </select>
-    </div>
     <header>
-    <h1>Bubble Cloud</h1>
-    <h2>The most frequently used words in:</h2>
+    <h2>Bubble Cloud</h2>
+    <h3>The most frequently used words in articles on UK political parties in period of 2010-2015:</h3>
       <h2 id="book-title"></h2>
     </header>
     <div id="main" role="main">
       <div id="vis"></div>
-      <div class="row">
-        <div id="status" class="col-md-6"></div>
-        <div class="col-md-6">test</div>
+      <div id="status" class=""></div>
+      <div class="tslct">
+        <b>Selected political party: </b>&nbsp;
+        <select id="text-select">
+          <option value="cameron">Cameron</option>
+          <option value="clegg">Clegg</option>
+        </select>
       </div>
       <div id="controls">
-        <h3>Time control <small id="currentYM"></small></h3>
+        <small>Visualisation month</small>
+        <h3 id="currentYM"></h3>
         <input id="currentdate" type="range" min="1" max="60" value="1" >
       </div>
     </div>
