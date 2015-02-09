@@ -11,7 +11,7 @@
 
   $(function(){
     var fill = d3.scale.category20();
-    d3.csv("data/hebdotitles.csv",function(error, data) {
+    d3.csv("data/cameronclegg_tot.csv",function(error, data) {
 
           console.log(d3.max(data.map(function(o){return(+o.count)})))
           console.log(d3.min(data.map(function(o){return(+o.count)})))
