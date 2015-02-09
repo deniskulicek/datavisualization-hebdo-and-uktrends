@@ -39,7 +39,7 @@
                                       <i><b>Day 6</b> (January 13th)</i> - Charlie Hebdo release press for Jan 14th     
       </span>
       <div class="row">
-        <div id="filters" class="col-md-6">
+        <div id="filters" class="col-md-3">
           <h3>Filter:</h3>
           <div class="radio">
             <label><input name="category" type="radio" value="all" checked/> All</label>
@@ -54,8 +54,14 @@
             <label><input name="category" type="radio" value="freedom"/> Freedom of speech<sup>***</sup></label>
           </div>
         </div>
-        <div class="col-md-6">
-            <button id="rescale" class="btn btn-lg btn-primary ">Scale y-axis to fit</button>
+        <div class="col-md-9">
+          <br/>
+          <br/>
+          <br/>
+          <button id="rescale" class="btn btn-lg btn-success" disabled>Scale y-axis to fit</button>
+          <br/>
+          <br/>
+          <br/>
         </div>
       </div>
       <div id="legend-words">
@@ -323,12 +329,16 @@
       }
 
       $('input[type=radio][name=category]').change(function() {
+        $('#rescale').attr("disabled", false);
         quickLoadLazynessHack(this.value, dataGlobal);
         var that = this;
 
         $('#rescale').on('click', function(e){
+          $('#rescale').attr("disabled", true);
           quickLoadLazynessHack(that.value, dataGlobal, true);
         });
+
+
         //setTimeout(function(){
         //  quickLoadLazynessHack(that.value, dataGlobal, true);
         //}, 1000);

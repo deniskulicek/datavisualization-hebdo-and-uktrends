@@ -26,7 +26,7 @@
 
   <div id="container" class="container">
     <div class="col-md-4 pull-right">
-      Political party:
+      <b>Selected political party: </b>&nbsp;
       <select id="text-select">
         <option value="cameron">Cameron</option>
         <option value="clegg">Clegg</option>
@@ -39,7 +39,10 @@
     </header>
     <div id="main" role="main">
       <div id="vis"></div>
-      <div id="status"></div>
+      <div class="row">
+        <div id="status" class="col-md-6"></div>
+        <div class="col-md-6">test</div>
+      </div>
       <div id="controls">
         <h3>Time control <small id="currentYM"></small></h3>
         <input id="currentdate" type="range" min="1" max="60" value="1" >
