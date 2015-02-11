@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+  <head>
+    <meta charset="utf-8">
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" /> <!--for stefano -->
+
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css(.tmp) styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+    <style>
+      body {
+        color: #121401;
+      }
+      svg {
+        font: 12px sans-serif;
+      }
+
+      .legend {
+        font: 18px sans-serif;
+      }
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: #121401;
+        stroke-width: 2px;
+        shape-rendering: crispEdges;
+      }
+      .point {
+        stroke: grey;
+        stroke-width: 3px;
+        opacity: 0;
+      }
+      .point:hover{
+        opacity: .5;
+      }
+    </style>
+    <!-- build:js(.) scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+  </head>
+  <body>
+    <div class="container">
+      <small><a href="."><small>&lt;&lt; Back</small></a></small> 
+      <h2 style="padding-left:60px;">Types of words used in news articles and on reddit after Paris Attack</h2>
+      <div id="graph"></div>
+      <span> <b><u>Key dates:</u> </b><i><b>Attack day</b></i>(January 7th, 2014); 
+                                      <i><b>Day 4</b> (January 11th)</i> - Paris March
+                                      <i><b>Day 6</b> (January 13th)</i> - Charlie Hebdo release press for Jan 14th     
+      </span>
+      <div class="row">
+        <div id="filters" class="col-md-3">
+          <h3>Filter:</h3>
+          <div class="radio">
+            <label><input name="category" type="radio" value="all" checked/> All</label>
+          </div>
+          <div class="radio">
+            <label><input name="category" type="radio" value="religion"/> Religious<sup>*</sup></label>
+          </div>
+          <div class="radio">
+            <label><input name="category" type="radio" value="violence"/> Violence<sup>**</sup></label>
+          </div>
+          <div class="radio">
+            <label><input name="category" type="radio" value="freedom"/> Freedom of speech<sup>***</sup></label>
+          </div>
+        </div>
+        <div class="col-md-9">
+          <br/>
+          <br/>
+          <br/>
+          <button id="rescale" class="btn btn-lg btn-success" disabled>Scale y-axis to fit</button>
+          <br/>
+          <br/>
+          <br/>
+        </div>
+      </div>
+      <div id="legend-words">
+        <i>* <b>Religious</b> words taken into consideration (lowecased): <b>faith, islam(ic), muslim(s), prophet, muhammad, religion/religious, jew(s), jewish, israel, qaeda</b></i><br/>
+        <i>** <b>Violent</b> words taken into consideration (lowecased): <b>attack(ers), kill(ed), gunmen, dead/death, police, violence, terror(ist(s)), hostage(s), kouachi, suicide, qaeda</b></i><br/>
+        <i>*** <b>Freedom of speech</b> words taken into consideration (lowecased): <b>speech, satirical, right, solidarity, march, cartoons</b></i>
+        <br/>
+        <i>All words were categorized manually based on dataset from scraped articles used for dataset itself.</i>
+      </div>
+      <footer>
+      <p><a href="http://www.delimited.io/blog/2014/3/3/creating-multi-series-charts-in-d3-lines-bars-area-and-streamgraphs">Original Visualisation by Steve Hall</a>
+      </p>
+    </footer>
+    </div>
+
+    <script src="/scripts/d3.min.js"></script>
+
+    <script>
+      var words = [];
+      words['religious'] = "faith, islam(ic), muslim(s), prophet, muhammad, religion/religious, jew(s), jewish, israel, qaeda";
+      words['violent'] = "attack(ers), kill(ed), gunmen, dead/death, police, violence, terror(ist(s)), hostage(s), kouachi, suicide, qaeda";
+      words['freedom'] = "speech, satirical, right, solidarity, march, cartoons";
+
+      var margin = {top: 20, right: 55, bottom: 30, left: 60},
+          width  = 1000 - margin.left - margin.right,
+          height = 480  - margin.top  - margin.bottom;
+
+      var x = d3.scale.ordinal()
+          .rangePoints([0, width]);
+
+      var y = d3.scale.linear()
+          .rangeRound([height, 0]);
+
+      var xAxis = d3.svg.axis()
+          .scale(x)
+          .orient("bottom");
+
+      var yAxis = d3.svg.axis()
+          .scale(y)
+          .orient("left");
+
+      var stack = d3.layout.stack()
+          .offset("zero")
+          .values(function (d) { return d.values; })
+          .x(function (d) { return x(d.label) + x.rangeBand() / 2; })
+          .y(function (d) { return d.value; });
+
+      var area = d3.svg.area()
+          .interpolate("cardinal")
+          .x(function (d) { return x(d.label); })
+          .y0(function (d) { return y(d.y0); })
+          .y1(function (d) { return y(d.y0 + d.y); });
+
+      var color = d3.scale.ordinal()//.category10()
+          .range(["#fc8d59", "#ffffbf", "#99d594"]);
+
+      var svg = d3.select("#graph").append("svg")
+          .attr("width",  width  + margin.left + margin.right)
+          .attr("height", height + margin.top  + margin.bottom)
+        .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      var filterCategory = 'all';
+      var dataGlobal;
+
+      d3.csv("data/hebdo_crossview.csv", function (error, data) {
+
+        //console.log(error);
+
+        if(error===null){
+          dataGlobal = data;
+          quickLoadLazynessHack(filterCategory, data);
+        }
+
+        //quickLoadLazynessHack(filterCategory);
+
+      });
+
+      function quickLoadLazynessHack(filterCategory, data, button){
+
+        var labelVar = 'day';
+        var categVar = 'keyword'
+        var varNames = d3.keys(data[0])
+            .filter(function (key) { return (key !== labelVar)});
+        color.domain(varNames);
+
+        var seriesArr = [], series = {};
+        varNames.forEach(function (name) {
+          
+          if(name !== categVar){
+            series[name] = {name: name, values:[]};
+            seriesArr.push(series[name]);
+          }
+        });
+
+        data.forEach(function (d) {
+          
+          if (d[categVar] === filterCategory){
+            
+            varNames.map(function (name) {
+              if(name !== categVar){
+                series[name].values.push({name: name, label: d[labelVar], value: +d[name]});
+              }
+            });
+          }
+        });
+
+        x.domain(data.map(function (d) { return d.day; }));
+
+        stack(seriesArr);
+
+        var ydomain_new = ([0, d3.max(seriesArr, function (c) { 
+          return d3.max(c.values, function (d) { return d.y0 + d.y; });
+        })]);
+
+        
+        ydomain_previous = y.domain();
+        //console.log(ydomain_previous, ydomain_new)
+
+        if(button!==undefined){
+          y.domain(ydomain_new)
+        } else if(ydomain_previous[1] === 1) {
+          y.domain(ydomain_new);
+        } else {
+          y.domain(ydomain_previous);
+        }
+
+        svg.selectAll("g").remove();
+        svg.selectAll(".series").remove();
+        svg.selectAll(".seriesPoints").remove();
+
+        var selection = svg.selectAll(".series")
+          .data(seriesArr)
+          .enter().append("g")
+            .attr("class", "series");
+
+        selection.append("path")
+          .attr("class", "streamPath")
+          .attr("d", function (d) { return area(d.values); })
+          .style("fill", function (d) { return color(d.name); })
+          .style("stroke", "grey");
+
+        var points = svg.selectAll(".seriesPoints")
+          .data(seriesArr)
+          .enter().append("g")
+            .attr("class", "seriesPoints");
+
+        points.selectAll(".point")
+          .data(function (d) { return d.values; })
+          .enter().append("circle")
+           .attr("class", "point")
+           .attr("cx", function (d) { return x(d.label) + x.rangeBand() / 2; })
+           .attr("cy", function (d) { return y(d.y0 + d.y); })
+           .attr("r", "10px")
+           .style("fill",function (d) { return color(d.name); })
+           .call(assignMouseOverOut);
+
+        function assignMouseOverOut(d) {
+          //if(d.value !==0 ){
+            d.on("mouseover", function (d) {
+              console.log('over'); 
+              if(d.value !== 0) { 
+                showPopover.call(this, d);
+              } else {
+                console.log('unbinding');
+                $(this).hide();
+              }
+            });
+            d.on("mouseout",  function (d) { removePopovers(); })
+          //}
+        }
+           
+
+        svg.selectAll(".legend").remove()
+
+        var legend = svg.selectAll(".legend")
+            .data(varNames.slice().reverse().filter(function(f){return f!==categVar;}))
+          .enter().append("g")
+            .attr("class", "legend")
+            .attr("transform", function (d, i) { return "translate(0," + i * 20 + ")"; });
+
+        legend.append("rect")
+            .attr("x", width - 10)
+            .attr("width", 10)
+            .attr("height", 10)
+            .style("fill", color)
+            .style("stroke", "grey");
+
+        legend.append("text")
+            .attr("x", width - 12)
+            .attr("y", 6)
+            .attr("dy", ".35em")
+            .style("text-anchor", "end")
+            .text(function (d) { return d; });
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+          .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("x", -25)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Cummulative number of words");
+
+        function removePopovers () {
+          $('.popover').each(function() {
+            $(this).remove();
+          }); 
+        }
+
+        function dayToEvent(day){
+          switch(day.label){
+            case "Attack day":
+              return "<b>Gunman attack at Charlie Hebdo - (January 7th)<b>";
+            case "Day 1":
+              return "<b>Policewoman killed (January 8th)<b>";
+            case "Day 2":
+              return "<b>Hebdo suspects shot, supermarket siege shooting - (January 9th)<b>";
+            case "Day 3":
+              return "<b>January 10th<b>";
+            case "Day 4":
+              return "<b>Paris march for freedom of speech (January 11th)<b>";
+            case "Day 5":
+              return "<b>January 12th<b>";
+            case "Day 6":
+              return "<b>Press about release of next Charlie magazine (January 13th)<b>";
+            case "Day 7":
+              return "<b>Release day (January 14th)<b>";
+            case "Day 8":
+              return "<b>Cooldown (January 15th)<b>";
+            case "Day 9":
+              return "<b>Cooldown (January 16th)<b>";
+            case "Day 10":
+              return "<b>Cooldown (January 17th)<b>";
+            case "Day 11":
+              return "<b>Cooldown (January 18th)<b>";
+            case "Day 12":
+              return "<b>Cooldown (January 19th)<b>";
+            case "Day 13":
+              return "<b>Cooldown (January 20th)<b>";
+            case "Day 14":
+              return "<b>Cooldown (January 21th)<b>";
+          }
+          
+        }
+
+        function showPopover (d) {
+          $(this).popover({
+            title: dayToEvent(d),
+            placement: 'auto top',
+            container: 'body',
+            trigger: 'manual',
+            html : true,
+            content: function() {
+              dayToEvent(d);
+              return "Source: " + d.name + 
+                     "<br/>Words: " + d.value }
+          });
+          $(this).popover('show')
+        }
+      }
+
+      $('input[type=radio][name=category]').change(function() {
+        $('#rescale').attr("disabled", false);
+        quickLoadLazynessHack(this.value, dataGlobal);
+        var that = this;
+
+        $('#rescale').on('click', function(e){
+          $('#rescale').attr("disabled", true);
+          quickLoadLazynessHack(that.value, dataGlobal, true);
+        });
+
+
+        //setTimeout(function(){
+        //  quickLoadLazynessHack(that.value, dataGlobal, true);
+        //}, 1000);
+      });
+    </script>
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-59594283-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+      <!-- build:js(.) scripts/plugins.js -->
+      <script src="bower_components/bootstrap/js/affix.js"></script>
+      <script src="bower_components/bootstrap/js/alert.js"></script>
+      <script src="bower_components/bootstrap/js/dropdown.js"></script>
+      <script src="bower_components/bootstrap/js/tooltip.js"></script>
+      <script src="bower_components/bootstrap/js/modal.js"></script>
+      <script src="bower_components/bootstrap/js/transition.js"></script>
+      <script src="bower_components/bootstrap/js/button.js"></script>
+      <script src="bower_components/bootstrap/js/popover.js"></script>
+      <script src="bower_components/bootstrap/js/carousel.js"></script>
+      <script src="bower_components/bootstrap/js/scrollspy.js"></script>
+      <script src="bower_components/bootstrap/js/collapse.js"></script>
+      <script src="bower_components/bootstrap/js/tab.js"></script>
+      <!-- endbuild -->
+
+  </body>
+</html>
