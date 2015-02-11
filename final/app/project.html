@@ -10,6 +10,7 @@
     <!-- build:css(.) styles/vendor.css -->
     <!-- bower:css -->
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
@@ -35,15 +36,29 @@
       <h1>Description</h1>
       <hr/>
       <article>
-        <p>text goes here</p>
-        <p>more ...</p>
-        <p>text goes here</p>
-        <p>more ...</p>
+        <p>In this project we apply InfoVis techniques on newspaper articles to spot trends and patterns in the data, like most used words, most talked about politicians, syntactic relationships between words. The goal was to provide interactive visualizations to efficiently communicate results.</p>
+        
+        <p>We collected a set of news articles from the guardian website using Heritrix web-crawler[1]. The topic of the articles was the political elections in the UK, focusing on the two major parties, the conservatives and the liberal democrats. We collected articles between February 2010 (the year of the elections) and January 2015.
+        Another event we wanted to analyze was the recent attack to the Charlie Hebdo offices and the subsequent terror spree in Paris. For this we collected news articles from Time and BBC websites. Moreover we wanted to investigate the reaction of people, so we crawled comments from the popular social community and news website Reddit about the Paris attack.
+        We extracted word counts and other statistics to create labelled .csv datasets to help us create the visualizations using d3. We focused not only on the key words and the number of appearances, but also on the date of publishing, so to make a time analysis.
+        </p>
+        
       </article>
       <hr/>
       <footer>
-        Something here...
-      </footer>
+        <h1>References</h1><br><br>
+        [1] Heritrix web-crawler <a href=https://webarchive.jira.com/wiki/display/Heritrix/Heritrix target="_blank">link</a><br><br>
+
+        [2] Wattenberg, Viégas, “The Word Tree, an Interactive Visual Concordance”, IEEE TRANSACTIONS ON VISUALIZATION AND COMPUTER GRAPHICS, VOL. 14,
+        NO. 6, NOVEMBER/DECEMBER 2008 <a href=https://www.cg.tuwien.ac.at/courses/InfoVis/papers/InfoVis2008%20The%20Word%20Tree,%20an%20Interactive%20Visual%20Concordance%20[Wattenberg].pdf target="_blank">link</a><br><br>
+
+        Visualizations by Jason Davies <a href=http://www.jasondavies.com/ target="_blank">jasondavies.com</a><br><br>
+
+        Jarke J. van Wijk, “The Value of Visualization”, Visualization, 2005. VIS 05. IEEE, 23-28 Oct. 2005, pg. 79-86 <a href=https://www.cs.ubc.ca/~tmm/courses/cpsc533c-05-fall/readings/vov.pdf target="_blank">link</a><br><br>
+
+        d3 js library documentation <a href=http://d3js.org/ target="_blank">d3js.org</a><br><br>
+
+        TU Delft Data Visualization slides on InfoVis</footer><br>
 
     </div>
 
