@@ -1,0 +1,10 @@
+<p style="float: left">Copyright &copy; <a href="http://www.jasondavies.com/">Jason Davies</a>
+
+<div class="help-wrapper grey credits"> <!--put this in submenu -->
+  <div class="wrapper">
+    <h2>Credits</h2>
+    <p>The <a href="http://hint.fm/projects/wordtree/">Word Tree visualisation technique</a> was invented by the incredible duo Martin Wattenberg and Fernanda Viégas in 2007.  Read <a href="http://hint.fm/papers/wordtree_final2.pdf">their paper</a> for the full details.
+    <p>Be sure to also check out various text analysis projects by <a href="http://moebio.com/">Santiago Ortiz</a>.
+    <p>Created by <a href="http://www.jasondavies.com/">Jason Davies</a>.  Thanks to <a href="http://bost.ocks.org/mike">Mike Bostock</a> for comments and suggestions.
+  </div>
+</div>

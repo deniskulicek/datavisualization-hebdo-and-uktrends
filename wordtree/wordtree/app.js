@@ -187,12 +187,12 @@ function getURL(url, callback) {
   console.log('calling ',url)
 
   d3.xhr(url, function(error, req) {
-    console.log(error, req)
+    //console.log(error, req)
     response(error, req);
   });
   
   function response(error, req) {
-    console.log("xhr", error, req)
+    //console.log("xhr", error, req)
     callback(error, req);
   }
 }
@@ -231,16 +231,23 @@ function change() {
   }
   var last = state ? state.source : null;
   state = urlParams(location.search.substr(1));
-  console.log(state)
+  //console.log(state)
   if (state.source !== last && state.source) {
     source.property("value", state.source);
-    getURL(state.source, function(text) {
-      console.log(text)
-      processText(text);
+    getURL(state.source, function(error, text) {
+      if(error)
+        return null;
+
+      console.log('text', text);
+      state.prefix = getTopNWords(text.response,1)[0];
+      console.log(state.prefix)
+      processText(text.response);
     });
     hideHelp();
   } else if (tokens && tokens.length) {
-    var start = topPrefix;//state.prefix;
+
+    var start = state.prefix;
+    //start = 'shit'
     if (!start) {
       url({prefix: start = tokens[0].token});
     }
@@ -340,14 +347,26 @@ function hoverKey() {
   svg.classed("hover", d3.event.shiftKey);
 }
 
+function isStopWord(word){
+  var stopWords = ["a","able","about","across","after","all","almost","also","am","among","an","and","any","are","as","at","be","because","been","but","by","can","cannot","could","dear","did","do","does","either","else","ever","every","for","from","get","got","had","has","have","he","her","hers","him","his","how","however","i","if","in","into","is","it","its","just","least","let","like","likely","may","me","might","most","must","my","neither","no","nor","not","of","off","often","on","only","or","other","our","own","rather","said","say","says","she","should","since","so","some","than","that","the","their","them","then","there","these","they","this","tis","to","too","twas","us","wants","was","we","were","what","when","where","which","while","who","whom","why","will","with","would","yet","you","your"];
+  return (stopWords.indexOf(word) !=- 1);
+} 
+
 function getTopNWords(text, n)
 {
     var wordRegExp = /\w+(?:'\w{1,2})?/g;
     var words = {};
     var matches;
+    var i = 0;
     while ((matches = wordRegExp.exec(text)) != null)
     {
+        i++;
         var word = matches[0].toLowerCase();
+        stopWord = isStopWord(word);
+        if (stopWord) {
+          continue;
+        }
+
         if (typeof words[word] == "undefined")
         {
             words[word] = 1;
@@ -361,9 +380,11 @@ function getTopNWords(text, n)
     var wordList = [];
     for (var word in words)
     {
-        if (words.hasOwnProperty(word))
+        if (words.hasOwnProperty(word) && !isStopWord(word))
         {
             wordList.push([word, words[word]]);
+        } else {
+          console.log("Stop word detected: ", word)
         }
     }
     wordList.sort(function(a, b) { return b[1] - a[1]; });
