@@ -1,0 +1,417 @@
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <title>Bubble chart</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <link rel="shortcut icon" href="/573783ea.favicon.ico">
+  <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+  <link rel="stylesheet" href="styles/9c307a9d.vendor.css">
+
+  <!-- CSS concatenated and minified via ant build script-->
+  <link rel="stylesheet" href="/styles/reset.css">
+  <!--link rel="stylesheet" href="/styles/bootstrap.min.css"-->
+  <link rel="stylesheet" href="/styles/bubchart.css">
+  <!-- end CSS-->
+
+</head>
+
+<body>
+
+  <div id="container" class="container">
+    <header>
+
+    <h2><small><a href="."><small>&lt;&lt; Back</small></a></small> Bubble Cloud</h2>
+    <h3>The most frequently used words in articles on UK political parties in period of 2010-2015:</h3>
+      <h2 id="book-title"></h2>
+    </header>
+    <div id="main" role="main">
+      <div id="vis"></div>
+      <div id="status" class=""></div>
+      <div class="tslct">
+        <b>Selected political party: </b>&nbsp;
+        <select id="text-select">
+          <option value="cameron">Cameron</option>
+          <option value="clegg">Clegg</option>
+        </select>
+      </div>
+      <div id="controls">
+        <small>Visualisation month</small>
+        <h3 id="currentYM"></h3>
+        <input id="currentdate" type="range" min="1" max="60" value="1" >
+      </div>
+    </div>
+    <footer>
+      <p>
+        <a href="http://vallandingham.me/building_a_bubble_cloud.html">Original visualisation by Jim Vallandingham</a><br/>
+        <a href="http://www.nytimes.com/interactive/2012/09/04/us/politics/democratic-convention-words.html">Original Inspiration</a>
+      </p>
+    </footer>
+  </div> <!--! end of #container -->
+
+  <script src="scripts/bcac3e9e.vendor.js"></script>
+
+
+  <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script> -->
+  <script>window.jQuery || document.write('<script src="/scripts/jquery-1.7.2.min.js"><\/script>')</script>
+  <script type="text/javascript">
+
+      
+
+  </script>
+
+  <script src="/scripts/d3.min.js"></script>
+  <script type="text/javascript">
+
+      var Bubbles, root, texts;
+
+      root = typeof exports !== "undefined" && exports !== null ? exports : this;
+
+      Bubbles = function() {
+        var chart, clear, click, collide, collisionPadding, connectEvents, data, force, gravity, hashchange, height, idValue, jitter, label, margin, maxRadius, minCollisionRadius, mouseout, mouseover, node, rScale, rValue, textValue, tick, transformData, update, updateActive, updateLabels, updateNodes, width;
+        width = 980;
+        height = 510;
+        data = [];
+        node = null;
+        label = null;
+        margin = {
+          top: 5,
+          right: 0,
+          bottom: 0,
+          left: 0
+        };
+        maxRadius = 55;
+        rScale = d3.scale.sqrt().range([0, maxRadius]);
+        rValue = function(d) {
+          return parseInt(d.count);
+        };
+        idValue = function(d) {
+          return d.name;
+        };
+        textValue = function(d) {
+          return d.name;
+        };
+        collisionPadding = 4;
+        minCollisionRadius = 12;
+        jitter = 0.6;
+        transformData = function(rawData) {
+          rawData.forEach(function(d) {
+            d.count = parseInt(d.count);
+            return rawData.sort(function() {
+              return 0.5 - Math.random();
+            });
+          });
+          return rawData;
+        };
+        tick = function(e) {
+          //console.log('tick', e)
+          var dampenedAlpha;
+          dampenedAlpha = e.alpha * 0.1;
+          //console.log(dampenedAlpha)
+
+          if(dampenedAlpha > 0.005){
+            node.each(gravity(dampenedAlpha)).each(collide(jitter)).attr("transform", function(d) {
+              return "translate(" + d.x + "," + d.y + ")";
+            });
+            return label.style("left", function(d) {
+              return ((margin.left + d.x) - d.dx / 2) + "px";
+            }).style("top", function(d) {
+              return ((margin.top + d.y) - d.dy / 2) + "px";
+            });
+          } else {
+            console.log('unbinding', force);
+            force.stop();
+            //force.tick = function(){}
+            //force = d3.layout.force().size([width, height]).on("tick", tick)
+          }
+
+        };
+        //force = d3.layout.force().gravity(0).charge(0).size([width, height]).on("tick", tick);
+        force = d3.layout.force().size([width, height]).on("tick", tick)
+        chart = function(selection) {
+          return selection.each(function(rawData) {
+            var maxDomainValue, svg, svgEnter;
+            data = transformData(rawData);
+            maxDomainValue = d3.max(data, function(d) {
+              return rValue(d);
+            });
+            rScale.domain([0, maxDomainValue]);
+            svg = d3.select(this).selectAll("svg").data([data]);
+            svgEnter = svg.enter().append("svg");
+            svg.attr("width", width + margin.left + margin.right);
+            svg.attr("height", height + margin.top + margin.bottom);
+            node = svgEnter.append("g").attr("id", "bubble-nodes").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            node.append("rect").attr("id", "bubble-background").attr("width", width).attr("height", height).on("click", clear);
+            label = d3.select(this).selectAll("#bubble-labels").data([data]).enter().append("div").attr("id", "bubble-labels");
+            update();
+            hashchange();
+            return d3.select(window).on("hashchange", hashchange);
+          });
+        };
+        totalWords = 0; 
+        update = function() {
+          data.forEach(function(d, i) {
+            totalWords += rValue(d)
+            //console.log(totalWords)
+            return d.forceR = Math.max(minCollisionRadius, rScale(rValue(d)));
+          });
+          force.nodes(data).start();
+          updateNodes();
+          return updateLabels();
+        };
+        updateNodes = function() {
+          node = node.selectAll(".bubble-node").data(data, function(d) {
+            return idValue(d);
+          });
+          node.exit().remove();
+          return node.enter().append("a").attr("class", "bubble-node").attr("xlink:href", function(d) {
+            return "#" + (encodeURIComponent(idValue(d)));
+          }).call(force.drag).call(connectEvents).append("circle").attr("r", function(d) {
+            return rScale(rValue(d));
+          });
+        };
+        updateLabels = function() {
+          var labelEnter;
+          label = label.selectAll(".bubble-label").data(data, function(d) {
+            return idValue(d);
+          });
+          label.exit().remove();
+          labelEnter = label.enter().append("a").attr("class", "bubble-label").attr("href", function(d) {
+            return "#" + (encodeURIComponent(idValue(d)));
+          }).call(force.drag).call(connectEvents);
+          labelEnter.append("div").attr("class", "bubble-label-name").text(function(d) {
+            return textValue(d);
+          });
+          labelEnter.append("div").attr("class", "bubble-label-value").text(function(d) {
+            return rValue(d);
+          });
+          label.style("font-size", function(d) {
+            return Math.max(8, rScale(rValue(d) / 2)) + "px";
+          }).style("width", function(d) {
+            return 2.5 * rScale(rValue(d)) + "px";
+          });
+          label.append("span").text(function(d) {
+            return textValue(d);
+          }).each(function(d) {
+            return d.dx = Math.max(2.5 * rScale(rValue(d)), this.getBoundingClientRect().width);
+          }).remove();
+          label.style("width", function(d) {
+            return d.dx + "px";
+          });
+          return label.each(function(d) {
+            return d.dy = this.getBoundingClientRect().height;
+          });
+        };
+        gravity = function(alpha) {
+          var ax, ay, cx, cy;
+          cx = width / 2;
+          cy = height / 2;
+          ax = alpha / 8;
+          ay = alpha;
+          return function(d) {
+            d.x += (cx - d.x) * ax;
+            return d.y += (cy - d.y) * ay;
+          };
+        };
+        collide = function(jitter) {
+          return function(d) {
+            return data.forEach(function(d2) {
+              var distance, minDistance, moveX, moveY, x, y;
+              if (d !== d2) {
+                x = d.x - d2.x;
+                y = d.y - d2.y;
+                distance = Math.sqrt(x * x + y * y);
+                minDistance = d.forceR + d2.forceR + collisionPadding;
+                if (distance < minDistance) {
+                  distance = (distance - minDistance) / distance * jitter;
+                  moveX = x * distance;
+                  moveY = y * distance;
+                  d.x -= moveX;
+                  d.y -= moveY;
+                  d2.x += moveX;
+                  return d2.y += moveY;
+                }
+              }
+            });
+          };
+        };
+        connectEvents = function(d) {
+          d.on("click", click);
+          d.on("mouseover", mouseover);
+          return d.on("mouseout", mouseout);
+        };
+        clear = function() {
+          return location.replace("#");
+        };
+        click = function(d) {
+          location.replace("#" + encodeURIComponent(idValue(d)));
+          return d3.event.preventDefault();
+        };
+        hashchange = function() {
+          var id;
+          id = decodeURIComponent(location.hash.substring(1)).trim();
+          return updateActive(id);
+        };
+        updateActive = function(id) {
+          var sel;
+          node.classed("bubble-selected", function(d) {
+            if(id===idValue(d))
+              sel = d  
+            return id === idValue(d);
+          });
+          //console.log(id, sel)
+          if (id.length > 0) {
+            return d3.select("#status").html("<h3>The occurance of the word <span class=\"active\">" + id + "</span> is " + (100*sel.count/totalWords).toFixed(2) + "%</h3>");
+          } else {
+            return d3.select("#status").html("<h3>No word is active</h3>");
+          }
+        };
+        mouseover = function(d) {
+          return node.classed("bubble-hover", function(p) {
+            return p === d;
+          });
+        };
+        mouseout = function(d) {
+          return node.classed("bubble-hover", false);
+        };
+        chart.jitter = function(_) {
+          if (!arguments.length) {
+            return jitter;
+          }
+          jitter = _;
+          force.start();
+          return chart;
+        };
+        chart.height = function(_) {s
+          if (!arguments.length) {
+            return height;
+          }
+          height = _;
+          return chart;
+        };
+        chart.width = function(_) {
+          if (!arguments.length) {
+            return width;
+          }
+          width = _;
+          return chart;
+        };
+        chart.r = function(_) {
+          if (!arguments.length) {
+            return rValue;
+          }
+          rValue = _;
+          return chart;
+        };
+        return [chart, force];
+      };
+
+      root.plotData = function(selector, data, plot) {
+        return d3.select(selector).datum(data).call(plot);
+      };
+  
+      d3.csv("data/export_by_month.csv", function(error, data){
+        
+        if(error) return;
+        
+        
+        //plotData("#vis", data, plot);
+        
+        //jQuery stuff
+        var replot = function(key, party){
+          clearPlot('#vis');
+          var bubbly = Bubbles(); //keeps running tick in background even if deleted
+          var plot = bubbly[0];
+          var force = bubbly[1];
+          force.stop()
+          
+          console.log('Replotting for: ', party, key);
+          
+          plotData('#vis', data.filter(function(o){
+            return o.date===key && o.party === party;
+          }), plot); //add filter by party!
+        }
+
+        function clearPlot(key){
+          $(key).empty();
+        }
+        
+        $('#currentdate').on('input', function(slider){
+          var monthseq = +slider.target.value;
+          console.log(monthseq)
+          $('#currentYM').html(monthSeq2Nice(monthseq));
+          replot(monthSeq2Key(monthseq), $('#text-select').val());
+        });
+
+        $('#text-select').on('change', function(selected){
+          var monthseq = $('#currentdate').val();
+          replot(monthSeq2Key(monthseq), $('#text-select').val());
+        });
+        
+        function zeroPad(num, places) {
+          var zero = places - num.toString().length + 1;
+          return Array(+(zero > 0 && zero)).join("0") + num;
+        }
+
+        function monthSeq2Key(m){
+          var mnth = (m+1)%12;
+          if(mnth==0){mnth=12};
+          return (2010 + ~~(m/12)) + "" + zeroPad(mnth,2)
+        }
+
+        function monthSeq2Nice(m){
+          var month, year;
+          switch(m%12){
+            case 0: month = "January"; break;
+            case 1: month = "February"; break;
+            case 2: month = "March"; break;
+            case 3: month = "April"; break;
+            case 4: month = "May"; break;
+            case 5: month = "June"; break;
+            case 6: month = "July"; break;
+            case 7: month = "August"; break;
+            case 8: month = "September"; break;
+            case 9: month = "October"; break;
+            case 10: month = "November"; break;
+            case 11: month = "December"; break;
+          }
+          year = 2010 + ~~(m/12)
+
+          return month + ", " + year;
+        }
+
+        $('#currentdate').trigger('input');
+      })  
+
+  </script>
+  <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-59594283-1', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+  
+  <script src="scripts/cb7562c6.plugins.js"></script>
+
+
+  <!--[if lt IE 7 ]>
+    <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
+    <script>window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})</script>
+  <![endif]-->
+  
+</body>
+</html>
