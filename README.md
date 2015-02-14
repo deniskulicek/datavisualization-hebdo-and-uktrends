@@ -13,7 +13,7 @@ We decided to create four visualizations to highlight different properties of th
 
 ####1. Word clouds and B​ubble clouds.
 ​This two visualizations aim at highlighting the most frequent words and help the user spot important words or topics that emerge from the articles and text data we collected.
-￼￼￼￼￼￼
+![Image of Word Cloud](https://delftdatavis.herokuapp.com/images/44ee9de1.wordcloud.png)
 For the bubble cloud the occurrence of keywords is encoded in the area of the bubble. The keyword and number of appearances is written inside the bubble and selecting a keyword the percentage is shown. We visualize a bubble cloud from the articles taken in a single month about the two UK political leaders: James Cameron and Nick Clegg. The user can select which month to inspect and which political leader. It is clear that Cameron got more media coverage on the guardian, especially after the election he won but even before, namely from February 2010 to May 2010. Some interesting keywords can be spotted, like “r​eform”​, “I​ndia”​, “P​akistan”​, dealing both with internal and foreign policy.
 For word clouds the occurrence of the word is encoded in the size of the font. The use of different categorical colours for every word helps the user spot the single words and makes the visualization nicer and less tiring to watch. For example the obvious top keywords emerging from the titles of the Paris attacks articles are: “a​ttacks,​”“c​harlie”​, h​ebdo”​,”p​aris”​, but also less obvious ones like “t​error”​, “m​uslim”​, “I​srael”​.
 
@@ -40,6 +40,7 @@ Of course this analysis of handwritten text is still rather basic and extracting
 Visualizations by Jason Davies h​ttp://www.jasondavies.com/
 Jarke J. van Wijk, “The Value of Visualization”, V​isualization, 2005. VIS 05. IEEE,​2​3­28 Oct. 2005,
 pg. 79­86 h​ttps://www.cs.ubc.ca/~tmm/courses/cpsc533c­05­fall/readings/vov.pdf d3 js library documentation h​ttp://d3js.org/
+
 TU Delft Data Visualization slides on InfoVis
 
 Temporary link to the demo:
