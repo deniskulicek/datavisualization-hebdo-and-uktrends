@@ -13,14 +13,18 @@ We decided to create four visualizations to highlight different properties of th
 
 ####1. Word clouds and B​ubble clouds.
 This two visualizations aim at highlighting the most frequent words and help the user spot important words or topics that emerge from the articles and text data we collected.
-![Image of Word Cloud](https://delftdatavis.herokuapp.com/images/44ee9de1.wordcloud.png)
+![Image of Bubble Cloud](https://delftdatavis.herokuapp.com/images/d71aa5be.bubbleuk.png)
 
 For the bubble cloud the occurrence of keywords is encoded in the area of the bubble. The keyword and number of appearances is written inside the bubble and selecting a keyword the percentage is shown. We visualize a bubble cloud from the articles taken in a single month about the two UK political leaders: James Cameron and Nick Clegg. The user can select which month to inspect and which political leader. It is clear that Cameron got more media coverage on the guardian, especially after the election he won but even before, namely from February 2010 to May 2010. Some interesting keywords can be spotted, like “reform”​, “India”​, “Pakistan”​, dealing both with internal and foreign policy.
+![Image of Word Cloud](https://delftdatavis.herokuapp.com/images/44ee9de1.wordcloud.png)
+
 For word clouds the occurrence of the word is encoded in the size of the font. The use of different categorical colours for every word helps the user spot the single words and makes the visualization nicer and less tiring to watch. For example the obvious top keywords emerging from the titles of the Paris attacks articles are: “a​ttacks,​”“c​harlie”​, h​ebdo”​,”p​aris”​, but also less obvious ones like “t​error”​, “m​uslim”​, “I​srael”​.
 
 ####2. Word tree[2].
 ​This visualization lets the user explore the complete text contained in an article to analyze relationships between words, most frequently occurring couples of words or expressions.
 It’s an interactive visualization in which the user can select the root of the tree (shift+click) and inspect the text at different levels of detail. It is a useful tool to analyze the writing style of a journalist or the style of a speech transcript.
+![Image of Word Tree](https://delftdatavis.herokuapp.com/images/3bf89b7f.wordtree.png)
+
 ￼￼
 ####3. Stacked area plot over time.
 ​We wanted to see how media coverage and people’s attention evolved over time during and after the attacks in Paris. This visualization plots over time the number of words spent on the argument on articles and on reddit in comments from people. We stacked the 3 sources in the plot so the user can easily compare the amounts and see all the evolution over time of words spent on the subject. Moreover the user can filter only some particular words relating to religion, violence or freedom of speech. The time step is 1 day. Even though the data is discrete time we decided to use a continuous function to interpolate between the days cause it gives a better idea of the trend and emphasises the local maxima. We also decided not to scale the vertical axis automatically so to emphasize the different amount of words present jumping from the “r​eligious”​ keywords to the ones about “f​reedom of speech”​and “v​iolence”​. The scaling of the y­axis can be performed clicking on the dedicated button.
