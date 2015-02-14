@@ -1,6 +1,9 @@
 ## PaperTrends - Online News Analysis
 *by Denis Kulicek & Stefano Imoscopi*
 
+###Online media analysis project
+![Cover Image](https://delftdatavis.herokuapp.com/images/c411e7e4.hebdo.jpg)
+
 ###Link to the demo:
 *https://delftdatavis.herokuapp.com/*
 
