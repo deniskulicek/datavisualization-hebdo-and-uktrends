@@ -1,6 +1,9 @@
 ## PaperTrends - Online News Analysis
 *by Denis Kulicek & Stefano Imoscopi*
 
+###Link to the demo:
+*https://delftdatavis.herokuapp.com/*
+
 ###Motivation/Problem addressed
 We wanted to apply and design InfoVis techniques on newspaper articles to spot trends and patterns in the data, like most used words, most talked about politicians and topics, syntactic relationships between words. The goal was to provide interactive visualizations to efficiently communicate results.
 
@@ -48,6 +51,3 @@ Jarke J. van Wijk, “The Value of Visualization”, V​isualization, 2005. VIS
 pg. 79­86 h​ttps://www.cs.ubc.ca/~tmm/courses/cpsc533c­05­fall/readings/vov.pdf d3 js library documentation h​ttp://d3js.org/
 
 TU Delft Data Visualization slides on InfoVis
-
-Temporary link to the demo:
-http://80.241.222.199:3474/
